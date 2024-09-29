@@ -17,11 +17,15 @@ class Statistic{
         int numWords; // 单词数
         int numChars; // 字符数
 
+        //各类单词的个数
+        int numKeywords[8];
+
     public:
         Statistic(){
             numLines = 0;
             numWords = 0;
             numChars = 0;
+            memset(numKeywords, 0, sizeof(numKeywords));
         }
 
         void addLine(){
@@ -32,6 +36,9 @@ class Statistic{
         }
         void addWord(std::vector<Token> tokens){
             numWords += tokens.size();
+            for(auto token : tokens){
+                numKeywords[(int)token.get_type()] ++;
+            }
         }
         void addChar(std::string line){
             numChars += line.size();
@@ -42,6 +49,14 @@ class Statistic{
             std::cout << "语句行数: " << numLines << "\t";
             std::cout << "单词数: " << numWords << "\t";
             std::cout << "字符数: " << numChars << std::endl;
+            std::cout << "各类单词的个数: " << std::endl;
+            std::cout << "标识符\t (Identifier): " << numKeywords[(int)Type::Identifier] << std::endl;
+            std::cout << "数字常量 (Number): " << numKeywords[(int)Type::Number] << std::endl;
+            std::cout << "字符串常量 (String): " << numKeywords[(int)Type::String] << std::endl;
+            std::cout << "字符常量 (Char): " << numKeywords[(int)Type::Char] << std::endl;
+            std::cout << "关键字\t (Keyword): " << numKeywords[(int)Type::Keyword] << std::endl;
+            std::cout << "运算符\t (Operator): " << numKeywords[(int)Type::Operator] << std::endl;
+            std::cout << "分隔符\t (Delimiters): " << numKeywords[(int)Type::Delimiters] << std::endl;
         }
 };
 
@@ -82,7 +97,7 @@ int main(int argc, char* argv[]){
         statistic.addChar(line);
         std::vector<Token> tokens = lexer.tokenize(line, statistic.getLines(), errors);
         statistic.addWord(tokens);
-
+        // 输出记号
         if(tokens.size() != 0)
             std::cout << statistic.getLines();
         for(auto token : tokens){

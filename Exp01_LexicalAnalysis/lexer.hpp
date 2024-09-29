@@ -25,7 +25,7 @@ class Error{
 
             std::cout << "错误信息如下: " << std::endl;
             for(auto error : error_position){
-                std::cout << "错误位置: " << std::get<0>(error) << "行" << std::get<1>(error) << "列" << " 发生在词法 " << std::get<2>(error) << std::endl;
+                std::cout << "错误位置: " << std::get<0>(error) << "行" << std::get<1>(error) + 1 << "列" << " 发生在词法 " << std::get<2>(error) << std::endl;
             }
         }
 };
@@ -50,6 +50,42 @@ class Lexer{
                 error.addError(errorLine, -1, "缺少}");
                 lbrace--;
             }
+        }
+};
+
+class Stake{
+    // 判断() [] {}是否匹配
+    private:
+        std::vector<char> stake;
+    public:
+        void push(char ch){
+            stake.push_back(ch);
+        }
+
+        bool check(char ch){
+            if(stake.size() == 0){
+                this->push(ch);
+                return false;
+            }
+            char top = stake.back();
+            if((top == '(' && ch == ')') || (top == '[' && ch == ']') || (top == '{' && ch == '}')){
+                stake.pop_back();
+                return true;
+            }
+            this->push(ch);
+            return false;
+        }
+
+        char top(){
+            return stake.back();
+        }
+
+        void pop(){
+            stake.pop_back();
+        }
+
+        bool empty(){
+            return stake.size() == 0;
         }
 };
 

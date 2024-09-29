@@ -58,8 +58,7 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
     State state = State::START;
     NUM_State num_state = NUM_State::NONE;
     int tempState = -1;
-    int lparen = 0; // 记录(的数量. 如果有)匹配则减1
-    int lbracket = 0; //  记录[的数量，如果有]匹配则减1
+    Stake stake;
 
     std::string temp_token;
 
@@ -75,13 +74,13 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                     i++;
                 }
                 else if(ch == '('){
-                    lparen++;
+                    stake.push(ch);
                     Token new_token("(", Type::Delimiters);
                     tokens.push_back(new_token);
                     i++;
                 }
                 else if(ch == '['){
-                    lbracket++;
+                    stake.push(ch);
                     Token new_token("[", Type::Delimiters);
                     tokens.push_back(new_token);
                     i++;
@@ -93,8 +92,7 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                     i++;
                 }
                 else if(ch == ')'){
-                    if(lparen > 0){
-                        lparen--;
+                    if(stake.check(')')){
                         Token new_token(")", Type::Delimiters);
                         tokens.push_back(new_token);
                         i++;
@@ -105,8 +103,7 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                     }
                 }
                 else if(ch == ']'){
-                    if(lbracket > 0){
-                        lbracket--;
+                    if(stake.check(']')){
                         Token new_token("]", Type::Delimiters);
                         tokens.push_back(new_token);
                         i++;
@@ -673,18 +670,27 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
             }
         }
         else if(state == State::IN_NUM){
-            Token new_token(temp_token, Type::Number);
-            tokens.push_back(new_token);
+            if(num_state == NUM_State::DECIMAL || num_state == NUM_State::FLOAT || num_state == NUM_State::EXPONENT){
+                Token new_token(temp_token, Type::Number);
+                tokens.push_back(new_token);
+            }
+            else{
+                error.addError(line_number, i, "数字常量错误");
+            }
         }
     }
 
-    while(lparen != 0){
-        error.addError(line_number, i, "括号 ) 匹配错误");
-        lparen--;
-    }
-    while(lbracket != 0){
-        error.addError(line_number, i, "括号 ] 匹配错误");
-        lbracket--;
+    while(!stake.empty()){
+        if(stake.top() == '('){
+            error.addError(line_number, i, "括号 ( 匹配错误");
+        }
+        else if(stake.top() == '['){
+            error.addError(line_number, i, "括号 [ 匹配错误");
+        }
+        else if(stake.top() == '{'){
+            error.addError(line_number, i, "括号 { 匹配错误");
+        }
+        stake.pop();
     }
 
     return tokens;

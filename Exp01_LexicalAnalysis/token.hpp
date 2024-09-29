@@ -25,6 +25,10 @@ class Token{
             this->property = original;
         }
 
+        Type get_type(){
+            return this->type;
+        }
+
         std::string output(){
             std::string type_str;
             switch(type){
