@@ -89,6 +89,10 @@ comment  {comment1}|{comment2}
 string \"([^\\\"]|\\.)*\"
 char   \'([^\\\']|\\.)*\'
 
+errorid [a-zA-Z0-9_]+
+errors  \"([^\\\"]|\\.)*(\n)?
+errorc  \'([^\\\']|\\.)
+
 %%
 "\n"      { numLines++; thisLine_Chars = 1; return -9; }
 {ws}      { numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  return -8; }
@@ -144,7 +148,10 @@ char   \'([^\\\']|\\.)*\'
 ";"       { fprintf(output, "Delimiters: ;\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Delimiters]++; return SEMICOLON; }
 ","       { fprintf(output, "Delimiters: ,\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Delimiters]++; return COMMA; }
 
-.         { fprintf(output, "%s :", yytext); return -1; } // 未匹配的字符返回-1
+.         { fprintf(output, "[!E] %s :", yytext); return -1; } // 未匹配的字符返回-1
+{errorid} { fprintf(output, "[!E] %s :", yytext); return -2; } // 特例：错误的标识符以数字开头
+{errors}  { fprintf(output, "[!E] %s :", yytext); return -3; }
+{errorc}  { fprintf(output, "[!E] %s :", yytext); return -3; }
 
 %%
 
@@ -169,6 +176,12 @@ int main(int argc, char **argv){
             break;
         else if (return_num == -1){
             fprintf(output, "ERROR in Line %d Char %d : Undefined matching pattern\n", numLines, thisLine_Chars);
+        }
+        else if (return_num == -2){
+            fprintf(output, "ERROR in Line %d Char %d : Wrong Identifier\n", numLines, thisLine_Chars);
+        }
+        else if (return_num == -3){
+            fprintf(output, "ERROR in Line %d Char %d : Incorrect character or string constant\n", numLines, thisLine_Chars);
         }
         else{
             ;
