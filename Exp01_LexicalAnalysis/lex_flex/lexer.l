@@ -145,6 +145,7 @@ errorc  \'([^\\\']|\\.)
 preprocmd ^[ \t]*#.*\n
 
 %%
+"\\\n"    { numLines++; thisLine_Chars = 1; return NEW_LINE_RET; }
 "\n"      { numLines++; thisLine_Chars = 1; return NEW_LINE_RET; }
 {ws}      { numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  return WS_RET; }
 {comment} { numChars+=strlen(yytext); return COMMENT_RET;}
@@ -162,8 +163,8 @@ preprocmd ^[ \t]*#.*\n
 ">="      { fprintf(output, "Operator:\t >=\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return GE; }
 "<"       { fprintf(output, "Operator:\t <\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return LT; }
 ">"       { fprintf(output, "Operator:\t >\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return GT; }
-"<<="     { fprintf(output, "Operator:\t <<= \n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return LSHIFT_ASS; }
-">>="     { fprintf(output, "Operator:\t >>= \n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return RSHIFT_ASS; }
+"<<="     { fprintf(output, "Operator:\t <<=\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return LSHIFT_ASS; }
+">>="     { fprintf(output, "Operator:\t >>=\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return RSHIFT_ASS; }
 "<<"      { fprintf(output, "Operator:\t <<\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return LSHIFT; }
 ">>"      { fprintf(output, "Operator:\t >>\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return RSHIFT; }
 "++"      { fprintf(output, "Operator:\t ++\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return INC; }
@@ -188,7 +189,10 @@ preprocmd ^[ \t]*#.*\n
 "*"       { fprintf(output, "Operator:\t *\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return MUL; }
 "/="      { fprintf(output, "Operator:\t /=\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return DIV_ASS; }
 "/"       { fprintf(output, "Operator:\t /\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return DIV; }
+"..."     { fprintf(output, "Operator:\t ...\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return Operator; }
 "."       { fprintf(output, "Operator:\t .\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return DOT; }
+":"       { fprintf(output, "Operator:\t :\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return Operator; }
+"?"       { fprintf(output, "Operator:\t ?\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Operator]++; return Operator; }
 
 "{"       { fprintf(output, "Delimiters:\t {\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Delimiters]++; return LBRACE; }
 "}"       { fprintf(output, "Delimiters:\t }\n"); numChars+=strlen(yytext); thisLine_Chars+=strlen(yytext);  numKeywords[Delimiters]++; return RBRACE; }

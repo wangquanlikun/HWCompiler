@@ -177,6 +177,11 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                         tokens.push_back(new_token);
                         i += 2;
                     }
+                    else if(i + 2 < line_length && line[i + 1] == '<' && line[i + 2] == '='){
+                        Token new_token("<<=", Type::Operator);
+                        tokens.push_back(new_token);
+                        i += 3;
+                    }
                     else if(i + 1 < line_length && line[i + 1] == '<'){
                         Token new_token("<<", Type::Operator);
                         tokens.push_back(new_token);
@@ -193,6 +198,11 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                         Token new_token(">=", Type::Operator);
                         tokens.push_back(new_token);
                         i += 2;
+                    }
+                    else if(i + 2 < line_length && line[i + 1] == '>' && line[i + 2] == '='){
+                        Token new_token(">>=", Type::Operator);
+                        tokens.push_back(new_token);
+                        i += 3;
                     }
                     else if(i + 1 < line_length && line[i + 1] == '>'){
                         Token new_token(">>", Type::Operator);
@@ -341,9 +351,16 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                     }
                 }
                 else if(ch == '.'){
-                    Token new_token(".", Type::Operator);
-                    tokens.push_back(new_token);
-                    i++;
+                    if(i + 2 < line_length && line[i + 1] == '.' && line[i + 2] == '.'){
+                        Token new_token("...", Type::Operator);
+                        tokens.push_back(new_token);
+                        i += 3;
+                    }
+                    else{
+                        Token new_token(".", Type::Operator);
+                        tokens.push_back(new_token);
+                        i++;
+                    }
                 }
                 else if(ch == '?'){
                     Token new_token("?", Type::Operator);
