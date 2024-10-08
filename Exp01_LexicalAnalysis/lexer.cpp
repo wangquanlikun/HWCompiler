@@ -345,6 +345,16 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                     tokens.push_back(new_token);
                     i++;
                 }
+                else if(ch == '?'){
+                    Token new_token("?", Type::Operator);
+                    tokens.push_back(new_token);
+                    i++;
+                }
+                else if(ch == ':'){
+                    Token new_token(":", Type::Operator);
+                    tokens.push_back(new_token);
+                    i++;
+                }
                 else if(ch == '"'){
                     temp_token += ch;
                     state = State::IN_STRING;
@@ -422,6 +432,15 @@ std::vector<Token> Lexer::tokenize(std::string line, int line_number, Error &err
                 else if(is_0to9(ch)){
                     state = State::IN_NUM;
                     num_state = NUM_State::START;
+                }
+                else if(ch == '\\'){
+                    if(i + 1 < line_length){
+                        error.addError(line_number, i, "不合法的输入字符 \\");
+                        i++;
+                    }
+                    else{
+                        i++; // C语言中可用\换行
+                    }
                 }
                 else{
                     error.addError(line_number, i, "不合法的输入字符 " + std::string(1, ch));
