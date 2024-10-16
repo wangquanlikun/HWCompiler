@@ -38,6 +38,17 @@ LL1Table::LL1Table(Grammar grammar){
             }
         }
     }
+
+    // 下面补充带有synth同步信息的LL(1)分析表
+    for(auto it = __table.begin(); it != __table.end(); it++){
+        auto A = it->first.first;
+        auto B = grammar.followSet(A);
+        for(auto b : B){
+            if(__table.find(std::make_pair(A, b)) == __table.end()){
+                __table[std::make_pair(A, b)] = Phrase({Symbol("syth")});
+            }
+        }
+    }
 }
 
 void LL1Table::print(){
@@ -74,6 +85,8 @@ void LL1Parser::parse(){
     std::cin >> input;
     input.append("$");
     __stack.push_back(this->__table.getGrammar().getStart());
+
+    bool noError = true;
     for(int i = 0; i < input.size(); ){
         auto c = input[i];
         
@@ -99,7 +112,9 @@ void LL1Parser::parse(){
         if(symbol.isTerminal()){
             if(symbol == input_symbol){
                 if(symbol.getName() == "$"){
-                    std::cout << std::endl << "Accept!" << std::endl;
+                    if(noError){
+                        std::cout << std::endl << "Accept!" << std::endl;
+                    }
                     return;
                 }
                 __stack.pop_back();
@@ -107,18 +122,26 @@ void LL1Parser::parse(){
                 std::cout << std::endl;
             }
             else{
-                std::cout << "Error: Not a LL(1) grammar!" << std::endl;
-                exit(1);
+                std::cout << "Error: 终结符与输入不匹配，从栈顶弹出符号" << std::endl;
+                noError = false;
+                __stack.pop_back();
             }
         }
         else{
             auto temp_it = __tableMap.find(std::make_pair(symbol, input_symbol));
             if(temp_it == __tableMap.end()){
-                std::cout << "Error: Not a LL(1) grammar!" << std::endl;
-                exit(1);
+                std::cout << "Error: 表项 M[A, a] 为空白，指针向前移动" << std::endl;
+                noError = false;
+                i++;
+                continue;
             }
             Phrase phrase = __tableMap[std::make_pair(symbol, input_symbol)];
             __stack.pop_back();
+            if(phrase.getPhrase().size() == 1 && phrase.getPhrase()[0].getName() == "syth"){
+                std::cout << "Error: 表项 M[A, a] 为同步信息，从栈顶弹出符号" << std::endl;
+                noError = false;
+                continue;
+            }
             if(!(phrase.getPhrase().size() == 1 && phrase.getPhrase()[0].getName() == "ε")){
                 std::vector<Symbol> temp;
                 for(auto symbol : phrase.getPhrase()){
