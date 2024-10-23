@@ -32,6 +32,10 @@ public:
     bool operator==(const LR0Item& other) const {
         return __left == other.__left && __right == other.__right && __dot == other.__dot;
     }
+
+    auto getLeft() const { return __left; }
+    auto getRight() const { return __right; }
+    auto getDot() const { return __dot; }
 };
 
 class LR0VaildItemSet {
@@ -60,14 +64,29 @@ private:
     std::vector<LR0VaildItemSet> __viablePrefix_DFA;
 public:
     viablePrefix_DFA(Grammar grammar);
+    auto getDFA() const { return __viablePrefix_DFA; }
     void print() const ;
 };
 
 class LRTable {
+private:
+    std::map<std::pair<int, Symbol>, std::pair<char, int>> __action;
+    std::map<std::pair<int, Symbol>, int> __goto;
 
+    std::map<std::pair<Symbol, Phrase>, int> phrase_id;
+    std::map<int, std::pair<Symbol, Phrase>> id_phrase;
+public:
+    LRTable(viablePrefix_DFA prefix_dfa, Grammar grammar);
+    void create_id(Grammar grammar);
+    auto getAction() const { return __action; }
+    auto getGoto() const { return __goto; }
+    void print() const;
 };
 
 class LRParser {
+private:
+    LRTable __table;
+public:
 
 };
 

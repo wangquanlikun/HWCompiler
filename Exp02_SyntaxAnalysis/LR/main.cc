@@ -9,7 +9,7 @@ void config(){
     system("cls"); // 清屏
     #endif
 
-    std::cout << "LR Parser" << std::endl;
+    std::cout << "LR Parser (SLR(1))" << std::endl;
 }
 
 int main(){
@@ -21,6 +21,9 @@ int main(){
 
     viablePrefix_DFA dfa(grammar);
     dfa.print();
+
+    LRTable table(dfa, grammar);
+    table.print();
 
     return 0;
 }
