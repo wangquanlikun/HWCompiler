@@ -25,5 +25,8 @@ int main(){
     LRTable table(dfa, grammar);
     table.print();
 
+    LRParser parser(table);
+    parser.parse();
+
     return 0;
 }

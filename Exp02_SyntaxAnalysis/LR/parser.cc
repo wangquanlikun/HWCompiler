@@ -178,7 +178,7 @@ void LRTable::print() const {
         max_state = std::max(max_state, goto_.first.first);
     }
 
-    for(int i = 0; i < max_state + 1; i++){
+    for(int i = 0; i <= max_state; i++){
         std::cout << std::endl << i << "\t";
         for(int j = 0; j < 15; j++){
             if(martix[i][j].first == 'S')
@@ -191,6 +191,57 @@ void LRTable::print() const {
                 std::cout << "ACC\t";
             else
                 std::cout << "\t";
+        }
+    }
+    std::cout << std::endl;
+}
+
+void LRParser::parse(){
+    std::string input;
+    std::cout << std::endl << "Input: ";
+    std::cin >> input;
+    __input = input + "$";
+
+    std::cout << "START PARSE:" << std::endl;
+    __stack.push_back({Symbol("-"), 0});
+    for(int i = 0; i < __input.size(); ){
+        char a = __input[i];
+        Symbol A = Symbol("error");
+        if(a >= '0' && a <= '9'){
+            A = Symbol("num");
+        }
+        else
+            A = Symbol(std::string(1, a));
+        int now_state = __stack.back().second;
+
+        if(__table.getAction().find({now_state, A}) == __table.getAction().end()){
+            std::cout << "SyntaxError" << std::endl;
+            return;
+        }
+        auto action = __table.getAction()[{now_state, A}];
+        if(action.first == 'S'){
+            __stack.push_back({A, action.second});
+            i++;
+            std::cout << "Shift  " << action.second << std::endl;
+        }
+        else if(action.first == 'R'){
+            auto phrase = __table.getIdPhrase()[action.second];
+            auto A = phrase.first;
+            auto alpha = phrase.second;
+            for(int j = 0; j < alpha.getPhrase().size(); j++){
+                __stack.pop_back();
+            }
+            int now_state = __stack.back().second;
+            __stack.push_back({A, __table.getGoto()[{now_state, A}]});
+            std::cout << "Reduce " << action.second << "\t"<< A.getName() << " -> " << alpha.toString() << std::endl;
+        }
+        else if(action.first == 'A'){
+            std::cout << "Accept" << std::endl;
+            return;
+        }
+        else{
+            std::cout << "SyntaxError" << std::endl;
+            return;
         }
     }
 }

@@ -78,16 +78,21 @@ private:
 public:
     LRTable(viablePrefix_DFA prefix_dfa, Grammar grammar);
     void create_id(Grammar grammar);
-    auto getAction() const { return __action; }
-    auto getGoto() const { return __goto; }
+    auto getAction() -> std::map<std::pair<int, Symbol>, std::pair<char, int>> { return __action; }
+    auto getGoto() -> std::map<std::pair<int, Symbol>, int> { return __goto; }
+    auto getIdPhrase() -> std::map<int, std::pair<Symbol, Phrase>> { return id_phrase; }
     void print() const;
 };
 
 class LRParser {
 private:
     LRTable __table;
+    std::string __input;
+    std::vector<std::pair<Symbol, int>> __stack;
 public:
+    LRParser(LRTable table) : __table(table) {}
 
+    void parse();
 };
 
 #endif
